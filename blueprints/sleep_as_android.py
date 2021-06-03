@@ -13,13 +13,7 @@ class ValidationException(BaseException):
 
 
 class SleepAsAndroidHandler():
-    def __init__(self, user_name: str, player_uuid: str) -> None:
-        if (user_name != Config.user_name):
-            raise ValidationException('Doesn\'t run for unspecified users')
-
-        if (player_uuid != Config.player_uuid):
-            raise ValidationException('Doesn\'t run for unspecified players')
-
+    def __init__(self) -> None:
         self.event_handler = IFTTTHandler()
 
     def _lights_low_dim(self):
@@ -36,10 +30,12 @@ class SleepAsAndroidHandler():
 
     def handle_event(self, event: str) -> None:
         EVENT_MAP = {
-            'media.play': self._lights_off,
-            'media.pause': self._lights_low_dim,
-            'media.resume': self._lights_off,
-            'media.stop': self._lights_on
+            'sleep_tracking_started': self._lights_off,
+            # 'sleep_tracking_stopped': self._lights_on,
+            'alarm_alert_start': self._lights_on,
+            'alarm_alert_dismiss': self._lights_low_dim,
+            'alarm_snooze_clicked': self._lights_off,
+            'alarm_snooze_canceled': self._lights_low_dim,
         }
 
         if event in EVENT_MAP:
@@ -48,23 +44,10 @@ class SleepAsAndroidHandler():
 
 @sleep_as_android_app.route('/', methods=['POST'])
 def get_webhook_entry():
-    print(request.data)
-    # print(request.data)
-    payload = request.form.to_dict().get('payload')
-    if not payload:
-        return {'success': False}, 400
-
-    payload = json.loads(payload)
-    if not payload.get('user', False):
-        return {'success': False}, 400
-
+    payload = request.get_json()
     try:
-        user = payload.get('Account', {}).get('title')
-        player = payload.get('Player', {}).get('uuid')
-        event = payload.get('event')
-
-        handler = SleepAsAndroidHandler(user, player)
-        handler.handle_event(event)
+        handler = SleepAsAndroidHandler()
+        handler.handle_event(payload.get('event'))
     except ValidationException:
         pass
 
