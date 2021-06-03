@@ -1,6 +1,6 @@
 import json
 from utils.config import Config
-from flask import Blueprint, request
+from flask import Blueprint, make_response, request
 
 
 plex_app = Blueprint('plex_app', __name__, template_folder='templates')
@@ -58,3 +58,7 @@ def get_webhook_entry():
         handler.handle_event(event)
     except ValidationException:
         pass
+
+    return {
+        'success': True
+    }
