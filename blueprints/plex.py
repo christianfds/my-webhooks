@@ -1,6 +1,6 @@
 import json
 from utils.config import Config
-from flask import Blueprint, Response, request
+from flask import Blueprint, request
 
 
 plex_app = Blueprint('plex_app', __name__, template_folder='templates')
@@ -43,11 +43,11 @@ class PlexHandler():
 def get_webhook_entry():
     payload = request.form.to_dict().get('payload')
     if not payload:
-        return Response({'success': False}, status=400)
+        return {'success': False}, 400
 
     payload = json.loads(payload)
     if not payload.get('user', False):
-        return Response({'success': False}, status=400)
+        return {'success': False}, 400
 
     try:
         user = payload.get('Account', {}).get('title')
@@ -59,4 +59,4 @@ def get_webhook_entry():
     except ValidationException:
         pass
 
-    return Response({'success': True}, status=200)
+    return {'success': True}, 200
