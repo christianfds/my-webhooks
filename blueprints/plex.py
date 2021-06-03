@@ -47,7 +47,7 @@ class PlexHandler():
 
 
 @plex_app.route('/', methods=['POST'])
-def get_webhook_entry():
+def webhook_entry():
     payload = request.form.to_dict().get('payload')
     if not payload:
         return {'success': False}, 400
