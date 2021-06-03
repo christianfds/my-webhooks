@@ -1,6 +1,8 @@
 import json
-from utils.config import Config
 from flask import Blueprint, request
+from utils.config import Config
+
+from integration.ifttt import IFTTTHandler
 
 
 plex_app = Blueprint('plex_app', __name__, template_folder='templates')
@@ -18,14 +20,19 @@ class PlexHandler():
         if (player_uuid != Config.player_uuid):
             raise ValidationException('Doesn\'t run for unspecified players')
 
+        self.event_handler = IFTTTHandler()
+
     def _lights_low_dim(self):
         print('Ligando as luzes com brilho baixo')
+        self.event_handler.send_event('lights_low_dim')
 
     def _lights_on(self):
         print('Ligando as luzes')
+        self.event_handler.send_event('lights_on')
 
     def _lights_off(self):
         print('Desligando as luzes')
+        self.event_handler.send_event('lights_off')
 
     def handle_event(self, event: str) -> None:
         EVENT_MAP = {
