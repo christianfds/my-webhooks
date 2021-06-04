@@ -63,7 +63,7 @@ def webhook_entry():
 
         handler = PlexHandler(user, player)
         handler.handle_event(event)
-    except ValidationException:
+    except ValidationException as e:
         pass
 
     return {'success': True}, 200

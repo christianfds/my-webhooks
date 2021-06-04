@@ -31,11 +31,10 @@ class SleepAsAndroidHandler():
     def handle_event(self, event: str) -> None:
         EVENT_MAP = {
             'sleep_tracking_started': self._lights_off,
-            # 'sleep_tracking_stopped': self._lights_on,
             'alarm_alert_start': self._lights_on,
-            'alarm_alert_dismiss': self._lights_low_dim,
-            'alarm_snooze_clicked': self._lights_off,
-            'alarm_snooze_canceled': self._lights_low_dim,
+            'alarm_alert_dismiss': self._lights_off,
+            'alarm_snooze_clicked': self._lights_low_dim,
+            'alarm_snooze_canceled': self._lights_off,
         }
 
         if event in EVENT_MAP:
