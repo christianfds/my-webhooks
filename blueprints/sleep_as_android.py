@@ -14,11 +14,11 @@ class ValidationException(BaseException):
 class SleepAsAndroidHandler():
     def __init__(self, uuid: str) -> None:
         self.uuid = uuid
-        self.user = config.get_settings(self.uuid, 'plex')
+        self.user = config.get_settings(self.uuid, 'sleep_as_android')
 
     def handle_event(self, event: str) -> None:
         if event in self.user['trigger_map']:
-            HandleOutputIntegrations(self.uuid, self.user)
+            HandleOutputIntegrations.send_event(self.uuid, self.user['trigger_map'][event])
 
 
 @sleep_as_android_app.route('/<uuid>', methods=['POST'])

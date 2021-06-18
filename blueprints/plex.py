@@ -16,7 +16,7 @@ class PlexHandler():
     def __init__(self, uuid: str, user_name: str, player_uuid: str) -> None:
         self.uuid = uuid
         self.user = config.get_settings(self.uuid, 'plex')
-        if self.user:
+        if not self.user:
             raise ValidationException('User without plex configuration')
 
         if (user_name != self.user['username']):
@@ -27,7 +27,7 @@ class PlexHandler():
 
     def handle_event(self, event: str) -> None:
         if event in self.user['trigger_map']:
-            HandleOutputIntegrations(self.uuid, self.user)
+            HandleOutputIntegrations.send_event(self.uuid, self.user['trigger_map'][event])
 
 
 @plex_app.route('/<uuid>', methods=['POST'])
