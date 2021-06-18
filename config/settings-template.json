@@ -1,0 +1,50 @@
+{
+    "debug": false,
+    "users": {
+        "uuid-key": {
+            "username": "Chris",
+            "plex": {
+                "username": "Chris",
+                "players": [
+                    "uid"
+                ],
+                "trigger_map": {
+                    "media.play": {
+                        "ifttt": ["lights_off"]
+                    },
+                    "media.pause": {
+                        "ifttt": ["lights_low_dim"]
+                    },
+                    "media.resume": {
+                        "ifttt": ["lights_off"]
+                    },
+                    "media.stop": {
+                        "ifttt": ["lights_off"]
+                    }
+                }
+            },
+            "sleep_as_android": {
+                "trigger_map": {
+                    "sleep_tracking_started": {
+                        "ifttt": ["lights_off"]
+                    },
+                    "alarm_alert_start": {
+                        "ifttt": ["lights_on"]
+                    },
+                    "alarm_alert_dismiss": {
+                        "ifttt": ["lights_off"]
+                    },
+                    "alarm_snooze_clicked": {
+                        "ifttt": ["lights_low_dim"]
+                    },
+                    "alarm_snooze_canceled": {
+                        "ifttt": ["lights_off"]
+                    }
+                }
+            },
+            "ifttt": {
+                "key": ""
+            }
+        }
+    }
+}
