@@ -1,8 +1,8 @@
 import json
 from flask import Blueprint, request
-from utils.config import Config
+from utils.config import config
 
-from integration.ifttt import IFTTTHandler
+from integration.integrations import HandleOutputIntegrations
 
 
 plex_app = Blueprint('plex_app', __name__, template_folder='templates')
@@ -13,41 +13,25 @@ class ValidationException(BaseException):
 
 
 class PlexHandler():
-    def __init__(self, user_name: str, player_uuid: str) -> None:
-        if (user_name != Config.user_name):
+    def __init__(self, uuid: str, user_name: str, player_uuid: str) -> None:
+        self.uuid = uuid
+        self.user = config.get_settings(self.uuid, 'plex')
+        if not self.user:
+            raise ValidationException('User without plex configuration')
+
+        if (user_name != self.user['username']):
             raise ValidationException('Doesn\'t run for unspecified users')
 
-        if (player_uuid != Config.player_uuid):
-            raise ValidationException('Doesn\'t run for unspecified players')
-
-        self.event_handler = IFTTTHandler()
-
-    def _lights_low_dim(self):
-        print('Ligando as luzes com brilho baixo')
-        self.event_handler.send_event('lights_low_dim')
-
-    def _lights_on(self):
-        print('Ligando as luzes')
-        self.event_handler.send_event('lights_on')
-
-    def _lights_off(self):
-        print('Desligando as luzes')
-        self.event_handler.send_event('lights_off')
+        if (player_uuid not in self.user['players']):
+            raise ValidationException(f'Doesn\'t run for unspecified player {player_uuid}')
 
     def handle_event(self, event: str) -> None:
-        EVENT_MAP = {
-            'media.play': self._lights_off,
-            'media.pause': self._lights_low_dim,
-            'media.resume': self._lights_off,
-            'media.stop': self._lights_on
-        }
-
-        if event in EVENT_MAP:
-            EVENT_MAP[event]()
+        if event in self.user['trigger_map']:
+            HandleOutputIntegrations.send_event(self.uuid, self.user['trigger_map'][event])
 
 
-@plex_app.route('/', methods=['POST'])
-def webhook_entry():
+@plex_app.route('/<uuid>', methods=['POST'])
+def webhook_entry(uuid: str):
     payload = request.form.to_dict().get('payload')
     if not payload:
         return {'success': False}, 400
@@ -61,7 +45,7 @@ def webhook_entry():
         player = payload.get('Player', {}).get('uuid')
         event = payload.get('event')
 
-        handler = PlexHandler(user, player)
+        handler = PlexHandler(uuid, user, player)
         handler.handle_event(event)
     except ValidationException as e:
         pass
